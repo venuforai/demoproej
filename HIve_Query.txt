@@ -1,0 +1,62 @@
+s3://venusparkdata/Employee/
+
+
+
+CREATE TABLE employee(empid INT, org STRING, ctc INT, loc STRING) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ':'
+LOCATION 's3://venusparkdata/Employee/';
+
+
+s3://venusparkdata/employee/
+
+
+CREATE EXTERNAL TABLE employee(empid INT, org STRING, ctc INT, loc STRING) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ':'
+LOCATION 's3://venusparkdata/employee/';
+
+
+
+
+
+
+
+CREATE TABLE T_USER_LOG_DYN (USER_ID INT
+                            ,NAME STRING
+                            ,SITE STRING
+                            )
+PARTITIONED BY (DT STRING,COUNTRY STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+STORED AS TEXTFILE
+;
+
+
+
+
+
+CREATE TABLE T_USER_LOG_SRC (USER_ID INT ,NAME STRING,SITE STRING,DT STRING ,COUNTRY STRING )
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '\t'
+STORED AS TEXTFILE
+;
+
+LOAD DATA INPATH 's3://venusparkdata/UserLogSrc/' OVERWRITE INTO TABLE T_USER_LOG_SRC;
+
+
+s3://venusparkdata/UserLogSrc/
+
+
+SET hive.exec.dynamic.partition = true;
+
+SET hive.exec.dynamic.partition.mode = nonstrict;
+
+INSERT OVERWRITE TABLE T_USER_LOG_DYN 
+PARTITION(DT,COUNTRY) 
+SELECT USER_ID,NAME,SITE,DT,COUNTRY FROM T_USER_LOG_SRC;
+
+
+
+
+
